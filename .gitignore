@@ -1,0 +1,6 @@
+.DS_Store
+.config.yaml
+nohup.out
+main
+
+bin/

@@ -1,0 +1,28 @@
+
+# Server settings
+PORT: 8080
+
+# Database settings
+DB_CONNECTION_STRING: user:password@tcp(127.0.0.1:3306)/mydb?charset=utf8&parseTime=True&loc=Local
+DB_DRIVER: mysql
+
+USERS_TABLE_NAME: users
+OTP_TABLE_NAME: otp
+SESSIONS_TABLE_NAME: sessions
+
+# OTP
+OTP_EXPIRE_MINS: 5
+
+# SMTP
+SMTP_USERNAME: user@example.com
+SMTP_PASSWORD: password
+SMTP_FROM: User <user@example.com>
+
+# Security
+#32 byte long sign key
+SIGN_KEY: g4k591b582367acccc27d1e5dc26bbbb
+JWT_ACCESS_EXPIRE_MINS: 15
+JWT_REFRESH_EXPIRE_MINS: 1440
+
+# user must do otp verification before registering
+VERIFY_BEFORE_REGISTER: true

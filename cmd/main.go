@@ -266,7 +266,9 @@ func HandleAllPublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lang, _ := getParams(r)
+	//TODO - get lang from getParams
+	//we need to re-create another r.Body for the proxy
+	lang := "en"
 
 	//make sure we have a valid url, before proxing
 	if ngauth.IsEmptyString(target.Scheme) && ngauth.IsEmptyString(target.Host) {

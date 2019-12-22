@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"net/smtp"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 	"unicode"
 
@@ -278,4 +280,16 @@ func GenerateToken(userID interface{}, expireMins int) (string, *Error) {
 	}
 
 	return tokenString, nil
+}
+
+// GetTokenFromHeader - gets access_token from header
+func GetTokenFromHeader(r *http.Request) string {
+	reqToken := r.Header.Get("Authorization")
+	splitToken := strings.Split(reqToken, "Bearer")
+	if len(splitToken) != 2 {
+		// Bearer token not in proper format
+		return ""
+	}
+
+	return strings.TrimSpace(splitToken[1])
 }

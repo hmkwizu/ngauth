@@ -55,8 +55,8 @@ type Configuration struct {
 	VerifyBeforeRegister bool
 
 	//proxy
-	BackendPublicURL  string
-	BackendPrivateURL string
+	UpstreamPublicURL  string
+	UpstreamPrivateURL string
 }
 
 // Config holds configuration variables
@@ -127,8 +127,8 @@ func InitConfig() {
 	Config.VerifyBeforeRegister = viper.GetBool("VERIFY_BEFORE_REGISTER")
 
 	//proxy
-	Config.BackendPublicURL = viper.GetString("BACKEND_PUBLIC_URL")
-	Config.BackendPrivateURL = viper.GetString("BACKEND_PRIVATE_URL")
+	Config.UpstreamPublicURL = viper.GetString("UPSTREAM_PUBLIC_URL")
+	Config.UpstreamPrivateURL = viper.GetString("UPSTREAM_PRIVATE_URL")
 
 	LogInfo("Server is running on PORT " + Config.Port)
 	LogInfo("DB DRIVER: " + Config.DBDriver)

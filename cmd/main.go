@@ -80,12 +80,12 @@ func routes() *chi.Mux {
 
 	//private routes - access token authentication done first, then proxy the request
 	router.Route("/pt", func(r chi.Router) {
-		r.Get("/*", IndexHandler)
-		r.Post("/*", IndexHandler)
-		r.Put("/*", IndexHandler)
-		r.Delete("/*", IndexHandler)
-		r.Patch("/*", IndexHandler)
-		r.Options("/*", IndexHandler)
+		r.Get("/*", HandleAllPrivate)
+		r.Post("/*", HandleAllPrivate)
+		r.Put("/*", HandleAllPrivate)
+		r.Delete("/*", HandleAllPrivate)
+		r.Patch("/*", HandleAllPrivate)
+		r.Options("/*", HandleAllPrivate)
 	})
 
 	return router
@@ -185,6 +185,14 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 // ChangePassword - changes user's password
 func ChangePassword(w http.ResponseWriter, r *http.Request) {
 
+	// Validate access token
+	accessToken := ngauth.GetTokenFromHeader(r)
+	err := ngauth.IsValidToken(accessToken)
+	if err != nil {
+		ngauth.ErrorResponse(w, err.Message, err.Code)
+		return
+	}
+
 	lang, receivedData := getParams(r)
 
 	response, err := ngauth.ChangePassword(ngauth.DB, lang, receivedData, hashCheck, hashMake)
@@ -258,17 +266,38 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 // HandleAllPublic - handles all public routes
 func HandleAllPublic(w http.ResponseWriter, r *http.Request) {
+	//TODO - get lang from getParams
+	//we need to re-create another r.Body for the proxy
+	lang := "en"
 
-	target, err := url.Parse(ngauth.Config.BackendPublicURL)
+	handleAllUpstream(lang, ngauth.Config.UpstreamPublicURL, w, r)
+}
+
+// HandleAllPrivate - handles all private routes
+func HandleAllPrivate(w http.ResponseWriter, r *http.Request) {
+	//TODO - get lang from getParams
+	//we need to re-create another r.Body for the proxy
+	lang := "en"
+
+	// Validate access token
+	accessToken := ngauth.GetTokenFromHeader(r)
+	err := ngauth.IsValidToken(accessToken)
+	if err != nil {
+		ngauth.ErrorResponse(w, err.Message, err.Code)
+		return
+	}
+
+	handleAllUpstream(lang, ngauth.Config.UpstreamPrivateURL, w, r)
+}
+
+func handleAllUpstream(lang string, upstreamURL string, w http.ResponseWriter, r *http.Request) {
+
+	target, err := url.Parse(upstreamURL)
 
 	if err != nil {
 		ngauth.ErrorResponse(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	//TODO - get lang from getParams
-	//we need to re-create another r.Body for the proxy
-	lang := "en"
 
 	//make sure we have a valid url, before proxing
 	if ngauth.IsEmptyString(target.Scheme) && ngauth.IsEmptyString(target.Host) {

@@ -361,13 +361,6 @@ func ChangePassword(db Database, lang string, params map[string]interface{}, pwd
 		return nil, NewError(lang, ErrorMissingFunctionParams)
 	}
 
-	// Validate access token
-	accessToken := GetStringOrEmpty(params["access_token"])
-	err := IsValidToken(accessToken)
-	if err != nil {
-		return nil, err
-	}
-
 	email := GetStringOrEmpty(params["email"])
 	phoneNumber := GetStringOrEmpty(params["phone_number"])
 	countryCode := GetStringOrEmpty(params["country_code"])

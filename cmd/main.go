@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -65,6 +67,26 @@ func routes() *chi.Mux {
 
 	//change password, token required
 	router.Post("/change_password", ChangePassword)
+
+	//public routes
+	router.Route("/pb", func(r chi.Router) {
+		r.Get("/*", HandleAllPublic)
+		r.Post("/*", HandleAllPublic)
+		r.Put("/*", HandleAllPublic)
+		r.Delete("/*", HandleAllPublic)
+		r.Patch("/*", HandleAllPublic)
+		r.Options("/*", HandleAllPublic)
+	})
+
+	//private routes - access token authentication done first, then proxy the request
+	router.Route("/pt", func(r chi.Router) {
+		r.Get("/*", IndexHandler)
+		r.Post("/*", IndexHandler)
+		r.Put("/*", IndexHandler)
+		r.Delete("/*", IndexHandler)
+		r.Patch("/*", IndexHandler)
+		r.Options("/*", IndexHandler)
+	})
 
 	return router
 }
@@ -230,4 +252,45 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	response["message"] = "Ok"
 
 	render.JSON(w, r, response)
+}
+
+//##### proxy http handlers
+
+// HandleAllPublic - handles all public routes
+func HandleAllPublic(w http.ResponseWriter, r *http.Request) {
+
+	target, err := url.Parse(ngauth.Config.BackendPublicURL)
+
+	if err != nil {
+		ngauth.ErrorResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	lang, _ := getParams(r)
+
+	//make sure we have a valid url, before proxing
+	if ngauth.IsEmptyString(target.Scheme) && ngauth.IsEmptyString(target.Host) {
+		ngauth.ErrorResponse(w, ngauth.ErrorText(lang, ngauth.ErrorBackendServerError), ngauth.ErrorBackendServerError)
+		return
+	}
+
+	//initialize proxy
+	proxy := httputil.NewSingleHostReverseProxy(target)
+
+	modifyResponse := func(res *http.Response) error {
+		if res.StatusCode == http.StatusBadGateway {
+			ngauth.ErrorResponse(w, ngauth.ErrorText(lang, ngauth.ErrorBackendServerError), ngauth.ErrorBackendServerError)
+		}
+		return nil
+	}
+	errorHandler := func(wr http.ResponseWriter, req *http.Request, err error) {
+		if err != nil {
+			ngauth.ErrorResponse(wr, err.Error(), http.StatusInternalServerError)
+		}
+	}
+
+	proxy.ModifyResponse = modifyResponse
+	proxy.ErrorHandler = errorHandler
+
+	proxy.ServeHTTP(w, r)
 }

@@ -26,3 +26,7 @@ JWT_REFRESH_EXPIRE_MINS: 1440
 
 # user must do otp verification before registering
 VERIFY_BEFORE_REGISTER: true
+
+# Proxy
+BACKEND_PUBLIC_URL: http://localhost:8081
+BACKEND_PRIVATE_URL: http://localhost:8081

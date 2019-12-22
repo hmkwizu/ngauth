@@ -53,6 +53,10 @@ type Configuration struct {
 
 	//only register verified users
 	VerifyBeforeRegister bool
+
+	//proxy
+	BackendPublicURL  string
+	BackendPrivateURL string
 }
 
 // Config holds configuration variables
@@ -121,6 +125,10 @@ func InitConfig() {
 	Config.JWTAccessExpireMins = viper.GetInt("JWT_ACCESS_EXPIRE_MINS")
 	Config.JWTRefreshExpireMins = viper.GetInt("JWT_REFRESH_EXPIRE_MINS")
 	Config.VerifyBeforeRegister = viper.GetBool("VERIFY_BEFORE_REGISTER")
+
+	//proxy
+	Config.BackendPublicURL = viper.GetString("BACKEND_PUBLIC_URL")
+	Config.BackendPrivateURL = viper.GetString("BACKEND_PRIVATE_URL")
 
 	LogInfo("Server is running on PORT " + Config.Port)
 	LogInfo("DB DRIVER: " + Config.DBDriver)

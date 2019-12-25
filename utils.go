@@ -234,7 +234,7 @@ func IsValidToken(tokenStr string) *Error {
 	if err != nil {
 		if verr, ok := err.(*jwt.ValidationError); ok {
 			if verr.Errors&jwt.ValidationErrorExpired > 0 {
-				return NewErrorWithMessage(ErrorBadRequest, "Token expired")
+				return NewErrorWithMessage(ErrorInvalidToken, "Token expired")
 			} else if verr.Errors&jwt.ValidationErrorIssuedAt > 0 {
 				return NewErrorWithMessage(ErrorBadRequest, "Token iat invalid")
 			} else if verr.Errors&jwt.ValidationErrorNotValidYet > 0 {
@@ -245,7 +245,7 @@ func IsValidToken(tokenStr string) *Error {
 	}
 
 	if token == nil || !token.Valid {
-		return NewErrorWithMessage(ErrorBadRequest, err.Error())
+		return NewErrorWithMessage(ErrorInvalidToken, err.Error())
 	}
 
 	//valid

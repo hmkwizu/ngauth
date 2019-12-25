@@ -189,7 +189,11 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	accessToken := ngauth.GetTokenFromHeader(r)
 	err := ngauth.IsValidToken(accessToken)
 	if err != nil {
-		ngauth.ErrorResponse(w, err.Message, err.Code)
+		if err.Code == ngauth.ErrorInvalidToken {
+			ngauth.HTTPErrorResponse(w, err.Message, http.StatusUnauthorized)
+		} else {
+			ngauth.ErrorResponse(w, err.Message, err.Code)
+		}
 		return
 	}
 
@@ -211,7 +215,11 @@ func Token(w http.ResponseWriter, r *http.Request) {
 
 	response, err := ngauth.Token(ngauth.DB, lang, receivedData)
 	if err != nil {
-		ngauth.ErrorResponse(w, err.Message, err.Code)
+		if err.Code == ngauth.ErrorInvalidToken {
+			ngauth.HTTPErrorResponse(w, err.Message, http.StatusUnauthorized)
+		} else {
+			ngauth.ErrorResponse(w, err.Message, err.Code)
+		}
 		return
 	}
 
@@ -283,7 +291,11 @@ func HandleAllPrivate(w http.ResponseWriter, r *http.Request) {
 	accessToken := ngauth.GetTokenFromHeader(r)
 	err := ngauth.IsValidToken(accessToken)
 	if err != nil {
-		ngauth.ErrorResponse(w, err.Message, err.Code)
+		if err.Code == ngauth.ErrorInvalidToken {
+			ngauth.HTTPErrorResponse(w, err.Message, http.StatusUnauthorized)
+		} else {
+			ngauth.ErrorResponse(w, err.Message, err.Code)
+		}
 		return
 	}
 

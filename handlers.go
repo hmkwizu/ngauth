@@ -65,9 +65,9 @@ func GenerateOTP(db Database, lang string, params map[string]interface{}, sendOT
 
 	verifCode := SecureRandomNumericStringStandard()
 
-	expiresAt := ExpireIn(time.Duration(Config.OTPExpireMins) * time.Minute) //in 5mins
+	expiresAt := ExpireAtTime(time.Duration(Config.OTPExpireMins) * time.Minute) //in 5mins
 
-	_, err := db.CreateOTP(OTP{Code: verifCode, OTPFor: otpFor, Email: email, PhoneNumber: phoneNumber, ExpiresAt: expiresAt, CreatedAt: NowTimestamp()}, lang)
+	_, err := db.CreateOTP(OTP{Code: verifCode, OTPFor: otpFor, Email: email, PhoneNumber: phoneNumber, ExpiresAt: NullTimeFrom(expiresAt), CreatedAt: NullTimeFrom(TimeNow())}, lang)
 	if err != nil {
 		return nil, err
 	}
@@ -139,18 +139,23 @@ func VerifyOTP(db Database, lang string, params map[string]interface{}) (map[str
 		return nil, NewError(lang, ErrorNotFound)
 	}
 
+	//invalid otp
+	if otp != nil && otp.Code != otpCode {
+		return nil, NewError(lang, ErrorInvalidOTPCode)
+	}
+
 	//already verified
-	if otp != nil && otp.VerifiedAt > 0 {
+	if otp != nil && otp.VerifiedAt.Valid {
 		return nil, NewError(lang, ErrorAlreadyVerified)
 	}
 
 	//valid otp
-	if otp != nil && otp.Code == otpCode && otp.ExpiresAt >= NowTimestamp() {
+	if otp != nil && otp.Code == otpCode && otp.ExpiresAt.Valid && otp.ExpiresAt.Time.After(TimeNow()) {
 
 		verifID := GenerateUUID()
 
 		//update db
-		err = db.UpdateOTPByID(otp.ID, Map{"verified_at": NowTimestamp(), "verification_id": verifID}, lang)
+		err = db.UpdateOTPByID(otp.ID, Map{"verified_at": TimeNow(), "verification_id": verifID}, lang)
 		if err != nil {
 			return nil, err
 		}
@@ -164,7 +169,7 @@ func VerifyOTP(db Database, lang string, params map[string]interface{}) (map[str
 	}
 
 	//check if otp expired
-	if otp != nil && otp.ExpiresAt < NowTimestamp() {
+	if otp != nil && otp.ExpiresAt.Valid && otp.ExpiresAt.Time.Before(TimeNow()) {
 		return nil, NewError(lang, ErrorExpiredOTPCode)
 	}
 
@@ -251,7 +256,7 @@ func Register(db Database, lang string, params map[string]interface{}, pwdHashCa
 
 	//now lets register the user
 	hashedPassword := pwdHashCallback(password)
-	user := User{Username: username, Email: email, PhoneNumber: phoneNumber, Password: hashedPassword, CreatedAt: NowTimestamp()}
+	user := User{Username: username, Email: email, PhoneNumber: phoneNumber, Password: hashedPassword, CreatedAt: NullTimeFrom(TimeNow())}
 	result, err := db.CreateUser(user, lang)
 	if err != nil {
 		return nil, err
@@ -338,7 +343,7 @@ func Login(db Database, lang string, params map[string]interface{}, pwdCheckCall
 	}
 
 	//save refresh token to db
-	_, err = db.CreateSession(Session{UserID: user.ID, RefreshToken: refreshToken, CreatedAt: NowTimestamp()}, lang)
+	_, err = db.CreateSession(Session{UserID: user.ID, RefreshToken: refreshToken, CreatedAt: NullTimeFrom(TimeNow())}, lang)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package ngauth
 
 import (
 	"crypto/rand"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -26,14 +27,32 @@ import (
 //regex for email validation
 var rgxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-// ExpireIn returns unix timestamp given a time duration
-func ExpireIn(tm time.Duration) int64 {
+// ExpireAtUTC returns unix timestamp expire_at given a time duration
+func ExpireAtUTC(tm time.Duration) int64 {
 	return NowTimestamp() + int64(tm.Seconds())
+}
+
+// ExpireAtTime returns time.Time expire_at given a time duration
+func ExpireAtTime(tm time.Duration) time.Time {
+	return TimeNow().Add(tm)
 }
 
 // NowTimestamp returns a unix timestamp
 func NowTimestamp() int64 {
 	return time.Now().UTC().Unix()
+}
+
+// TimeNow returns time now
+func TimeNow() time.Time {
+	return time.Now()
+}
+
+// NullTimeFrom creates a new Time that will always be valid.
+func NullTimeFrom(t time.Time) sql.NullTime {
+	return sql.NullTime{
+		Time:  t,
+		Valid: true,
+	}
 }
 
 // LogInfo - logs a message to stdout
@@ -268,8 +287,8 @@ func GenerateToken(userID interface{}, expireMins int) (string, *Error) {
 	// NOTE: Don't add sensitive info to the token, eg. password
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":  userID,
-		"iat": NowTimestamp(),                                    //issued at NOW!
-		"exp": ExpireIn(time.Duration(expireMins) * time.Minute), //expires in n minutes
+		"iat": NowTimestamp(),                                       //issued at NOW!
+		"exp": ExpireAtUTC(time.Duration(expireMins) * time.Minute), //expires in n minutes
 	})
 
 	//Sign the Token

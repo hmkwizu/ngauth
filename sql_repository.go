@@ -9,7 +9,7 @@ import (
 // SQLRepository queries the database and returns results to the controller
 // Add your methods here for the handler functions your create in the controller
 type SQLRepository struct {
-	db *gorm.DB
+	DB *gorm.DB
 }
 
 // Init - initialize
@@ -25,13 +25,13 @@ func (r *SQLRepository) Init(config *Configuration) error {
 	}
 
 	var err error
-	r.db, err = gorm.Open(config.DBDriver, config.DBConnectionString)
+	r.DB, err = gorm.Open(config.DBDriver, config.DBConnectionString)
 
 	if err != nil {
 		return err
 	}
 
-	if err = r.db.DB().Ping(); err != nil {
+	if err = r.DB.DB().Ping(); err != nil {
 		return err
 	}
 
@@ -48,7 +48,7 @@ func (r *SQLRepository) UpdateRecordByID(tableName string, inRecordID interface{
 		return NewError(lang, ErrorEmptyFields)
 	}
 
-	err := r.db.Table(tableName).Where("id=?", inRecordID).UpdateColumns(columns)
+	err := r.DB.Table(tableName).Where("id=?", inRecordID).UpdateColumns(columns)
 
 	if err.Error != nil {
 		return NewErrorWithMessage(ErrorDBError, err.Error.Error())
@@ -64,7 +64,7 @@ func (r *SQLRepository) CreateRecord(tableName string, record interface{}, lang 
 		return NewError(lang, ErrorEmptyFields)
 	}
 
-	err := r.db.Table(tableName).Create(record)
+	err := r.DB.Table(tableName).Create(record)
 
 	if err.Error != nil {
 		return NewErrorWithMessage(ErrorDBError, err.Error.Error())
@@ -82,7 +82,7 @@ func (r *SQLRepository) GetRecord(tableName string, tableColumns string, inRecor
 		return NewError(lang, ErrorEmptyFields)
 	}
 
-	err := r.db.Table(tableName).Select(tableColumns).Where("id=?", recordID).Where("deleted_at IS NULL").First(resultRecord)
+	err := r.DB.Table(tableName).Select(tableColumns).Where("id=?", recordID).Where("deleted_at IS NULL").First(resultRecord)
 	//no rows error
 	if err.RecordNotFound() {
 		return nil
@@ -122,7 +122,7 @@ func (r *SQLRepository) GetUserBy(email string, phoneNo string, lang string) (*U
 		email = ""
 	}
 
-	query := r.db.Table(Config.UsersTableName).Select("id,email,phone_number,password")
+	query := r.DB.Table(Config.UsersTableName).Select("id,email,phone_number,password")
 
 	if useEmail {
 		query = query.Where("email=?", email)
@@ -169,7 +169,7 @@ func (r *SQLRepository) GetOTP(email string, phoneNo string, otpFor string, lang
 		email = ""
 	}
 
-	query := r.db.Table(Config.OTPTableName).Select("*").Where("otp_for=?", otpFor)
+	query := r.DB.Table(Config.OTPTableName).Select("*").Where("otp_for=?", otpFor)
 
 	//email
 	if useEmail {
@@ -219,7 +219,7 @@ func (r *SQLRepository) GetSession(refreshToken string, lang string) (*Session, 
 	}
 
 	var session Session
-	err := r.db.Table(Config.SessionsTableName).Select("*").Where("refresh_token=?", refreshToken).First(&session)
+	err := r.DB.Table(Config.SessionsTableName).Select("*").Where("refresh_token=?", refreshToken).First(&session)
 	//no rows error
 	if err.RecordNotFound() {
 		return nil, nil

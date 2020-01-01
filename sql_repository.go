@@ -13,7 +13,7 @@ type SQLRepository struct {
 }
 
 // Init - initialize
-func (r *SQLRepository) Init(config Configuration) error {
+func (r *SQLRepository) Init(config *Configuration) error {
 
 	//make sure InitConfig was called
 	if len(config.DBDriver) == 0 {

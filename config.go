@@ -60,31 +60,10 @@ type Configuration struct {
 }
 
 // Config holds configuration variables
-var Config Configuration
+var Config *Configuration
 
-// DB - Database interface, MUST store pointer to struct
-var DB Database
-
-// InitDB opens the database connection
-func InitDB() {
-
-	//make sure InitConfig was called
-	if len(Config.DBDriver) == 0 {
-		InitConfig()
-	}
-
-	//easily swap repository implementation here
-	DB = &SQLRepository{}
-
-	err := DB.Init(Config)
-	if err != nil {
-		log.Println(err)
-	}
-
-}
-
-// InitConfig initializes configuration variables
-func InitConfig() {
+// ParseConfig parses environment variables to configuration
+func ParseConfig(inConfig *Configuration) {
 
 	//read config file
 	viper.SetConfigName(".config") // name of config file (without extension)
@@ -113,24 +92,26 @@ func InitConfig() {
 	viper.SetDefault("VERIFY_BEFORE_REGISTER", "true")
 
 	//############### GET VALUES FROM ENV
-	Config.Port = viper.GetString("PORT")
-	Config.DBConnectionString = viper.GetString("DB_CONNECTION_STRING")
-	Config.DBDriver = viper.GetString("DB_DRIVER")
-	Config.UsersTableName = viper.GetString("USERS_TABLE_NAME")
-	Config.OTPTableName = viper.GetString("OTP_TABLE_NAME")
-	Config.SessionsTableName = viper.GetString("SESSIONS_TABLE_NAME")
+	inConfig.Port = viper.GetString("PORT")
+	inConfig.DBConnectionString = viper.GetString("DB_CONNECTION_STRING")
+	inConfig.DBDriver = viper.GetString("DB_DRIVER")
+	inConfig.UsersTableName = viper.GetString("USERS_TABLE_NAME")
+	inConfig.OTPTableName = viper.GetString("OTP_TABLE_NAME")
+	inConfig.SessionsTableName = viper.GetString("SESSIONS_TABLE_NAME")
 
-	Config.OTPExpireMins = viper.GetInt("OTP_EXPIRE_MINS")
-	Config.SignKey = []byte(viper.GetString("SIGN_KEY"))
-	Config.JWTAccessExpireMins = viper.GetInt("JWT_ACCESS_EXPIRE_MINS")
-	Config.JWTRefreshExpireMins = viper.GetInt("JWT_REFRESH_EXPIRE_MINS")
-	Config.VerifyBeforeRegister = viper.GetBool("VERIFY_BEFORE_REGISTER")
+	inConfig.OTPExpireMins = viper.GetInt("OTP_EXPIRE_MINS")
+	inConfig.SignKey = []byte(viper.GetString("SIGN_KEY"))
+	inConfig.JWTAccessExpireMins = viper.GetInt("JWT_ACCESS_EXPIRE_MINS")
+	inConfig.JWTRefreshExpireMins = viper.GetInt("JWT_REFRESH_EXPIRE_MINS")
+	inConfig.VerifyBeforeRegister = viper.GetBool("VERIFY_BEFORE_REGISTER")
 
 	//proxy
-	Config.UpstreamPublicURL = viper.GetString("UPSTREAM_PUBLIC_URL")
-	Config.UpstreamPrivateURL = viper.GetString("UPSTREAM_PRIVATE_URL")
+	inConfig.UpstreamPublicURL = viper.GetString("UPSTREAM_PUBLIC_URL")
+	inConfig.UpstreamPrivateURL = viper.GetString("UPSTREAM_PRIVATE_URL")
 
-	LogInfo("Server is running on PORT " + Config.Port)
-	LogInfo("DB DRIVER: " + Config.DBDriver)
+}
 
+// SetConfig - set Config for the package
+func SetConfig(inConfig *Configuration) {
+	Config = inConfig
 }

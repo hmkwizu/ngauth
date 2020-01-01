@@ -14,6 +14,12 @@ import (
 	"github.com/hmkwizu/ngauth"
 )
 
+// config holds configuration variables
+var config ngauth.Configuration
+
+// db - Database interface, MUST store pointer to struct
+var db ngauth.Database
+
 func routes() *chi.Mux {
 
 	router := chi.NewRouter()
@@ -93,10 +99,11 @@ func routes() *chi.Mux {
 
 func main() {
 
-	ngauth.InitConfig()
+	ngauth.ParseConfig(&config)
+	ngauth.SetConfig(&config)
 
 	//initialize the database
-	ngauth.InitDB()
+	initDB()
 
 	//create the routes
 	router := routes()
@@ -109,15 +116,32 @@ func main() {
 		log.Panicf("Logging err: %s\n", err.Error()) // panic if there is an error
 	}
 
-	log.Fatal(http.ListenAndServe(":"+ngauth.Config.Port, router))
+	ngauth.LogInfo("Server is running on PORT " + config.Port)
+	ngauth.LogInfo("DB DRIVER: " + config.DBDriver)
+
+	log.Fatal(http.ListenAndServe(":"+config.Port, router))
 }
+
+// initDB opens the database connection
+func initDB() {
+
+	//easily swap repository implementation here
+	db = &ngauth.SQLRepository{}
+
+	err := db.Init(&config)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+// ###################### http handlers ##############
 
 // GenerateOTP - generates otp and sends it
 func GenerateOTP(w http.ResponseWriter, r *http.Request) {
 
 	lang, receivedData := getParams(r)
 
-	response, err := ngauth.GenerateOTP(ngauth.DB, lang, receivedData, sendOTPCallback)
+	response, err := ngauth.GenerateOTP(db, lang, receivedData, sendOTPCallback)
 	if err != nil {
 		ngauth.ErrorResponse(w, err.Message, err.Code)
 		return
@@ -131,7 +155,7 @@ func VerifyOTP(w http.ResponseWriter, r *http.Request) {
 
 	lang, receivedData := getParams(r)
 
-	response, err := ngauth.VerifyOTP(ngauth.DB, lang, receivedData)
+	response, err := ngauth.VerifyOTP(db, lang, receivedData)
 	if err != nil {
 		ngauth.ErrorResponse(w, err.Message, err.Code)
 		return
@@ -145,7 +169,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	lang, receivedData := getParams(r)
 
-	response, err := ngauth.Register(ngauth.DB, lang, receivedData, hashMake)
+	response, err := ngauth.Register(db, lang, receivedData, hashMake)
 	if err != nil {
 		ngauth.ErrorResponse(w, err.Message, err.Code)
 		return
@@ -159,7 +183,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	lang, receivedData := getParams(r)
 
-	response, err := ngauth.Login(ngauth.DB, lang, receivedData, hashCheck)
+	response, err := ngauth.Login(db, lang, receivedData, hashCheck)
 	if err != nil {
 		ngauth.ErrorResponse(w, err.Message, err.Code)
 		return
@@ -173,7 +197,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	lang, receivedData := getParams(r)
 
-	response, err := ngauth.ResetPassword(ngauth.DB, lang, receivedData, hashMake)
+	response, err := ngauth.ResetPassword(db, lang, receivedData, hashMake)
 	if err != nil {
 		ngauth.ErrorResponse(w, err.Message, err.Code)
 		return
@@ -199,7 +223,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 
 	lang, receivedData := getParams(r)
 
-	response, err := ngauth.ChangePassword(ngauth.DB, lang, receivedData, hashCheck, hashMake)
+	response, err := ngauth.ChangePassword(db, lang, receivedData, hashCheck, hashMake)
 	if err != nil {
 		ngauth.ErrorResponse(w, err.Message, err.Code)
 		return
@@ -213,7 +237,7 @@ func Token(w http.ResponseWriter, r *http.Request) {
 
 	lang, receivedData := getParams(r)
 
-	response, err := ngauth.Token(ngauth.DB, lang, receivedData)
+	response, err := ngauth.Token(db, lang, receivedData)
 	if err != nil {
 		if err.Code == ngauth.ErrorInvalidToken {
 			ngauth.HTTPErrorResponse(w, err.Message, http.StatusUnauthorized)
@@ -278,7 +302,7 @@ func HandleAllPublic(w http.ResponseWriter, r *http.Request) {
 	//we need to re-create another r.Body for the proxy
 	lang := "en"
 
-	handleAllUpstream(lang, ngauth.Config.UpstreamPublicURL, w, r)
+	handleAllUpstream(lang, config.UpstreamPublicURL, w, r)
 }
 
 // HandleAllPrivate - handles all private routes
@@ -299,7 +323,7 @@ func HandleAllPrivate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handleAllUpstream(lang, ngauth.Config.UpstreamPrivateURL, w, r)
+	handleAllUpstream(lang, config.UpstreamPrivateURL, w, r)
 }
 
 func handleAllUpstream(lang string, upstreamURL string, w http.ResponseWriter, r *http.Request) {

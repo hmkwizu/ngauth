@@ -3,6 +3,8 @@ package ngauth
 import (
 	"net/http"
 	"time"
+
+	"gopkg.in/guregu/null.v3"
 )
 
 //PwdHashFunc - function to hash a plain password
@@ -67,7 +69,7 @@ func GenerateOTP(db Database, lang string, params map[string]interface{}, sendOT
 
 	expiresAt := ExpireAtTime(time.Duration(Config.OTPExpireMins) * time.Minute) //in 5mins
 
-	_, err := db.CreateOTP(OTP{Code: verifCode, OTPFor: otpFor, Email: email, PhoneNumber: phoneNumber, ExpiresAt: NullTimeFrom(expiresAt), CreatedAt: NullTimeFrom(TimeNow())}, lang)
+	_, err := db.CreateOTP(OTP{Code: verifCode, OTPFor: otpFor, Email: email, PhoneNumber: phoneNumber, ExpiresAt: null.TimeFrom(expiresAt), CreatedAt: null.TimeFrom(TimeNow())}, lang)
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +258,7 @@ func Register(db Database, lang string, params map[string]interface{}, pwdHashCa
 
 	//now lets register the user
 	hashedPassword := pwdHashCallback(password)
-	user := User{Username: username, Email: email, PhoneNumber: phoneNumber, Password: hashedPassword, CreatedAt: NullTimeFrom(TimeNow())}
+	user := User{Username: username, Email: email, PhoneNumber: phoneNumber, Password: hashedPassword, CreatedAt: null.TimeFrom(TimeNow())}
 	result, err := db.CreateUser(user, lang)
 	if err != nil {
 		return nil, err
@@ -343,7 +345,7 @@ func Login(db Database, lang string, params map[string]interface{}, pwdCheckCall
 	}
 
 	//save refresh token to db
-	_, err = db.CreateSession(Session{UserID: user.ID, RefreshToken: refreshToken, CreatedAt: NullTimeFrom(TimeNow())}, lang)
+	_, err = db.CreateSession(Session{UserID: user.ID, RefreshToken: refreshToken, CreatedAt: null.TimeFrom(TimeNow())}, lang)
 	if err != nil {
 		return nil, err
 	}

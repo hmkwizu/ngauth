@@ -38,4 +38,7 @@ type Session struct {
 	DeviceName   string      `json:"device_name"`
 	RefreshToken string      `json:"refresh_token"`
 	CreatedAt    null.Time   `json:"created_at"`
+
+	IPAddr    string `json:"ip_addr"`
+	UserAgent string `json:"user_agent"`
 }

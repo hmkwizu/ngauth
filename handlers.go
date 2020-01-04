@@ -285,6 +285,9 @@ func Login(db Database, lang string, params map[string]interface{}, pwdCheckCall
 	countryCode := GetStringOrEmpty(params["country_code"])
 	password := GetStringOrEmpty(params["password"])
 
+	ipAddr := GetStringOrEmpty(params["ip_addr"])
+	userAgent := GetStringOrEmpty(params["user_agent"])
+
 	//flag to show whether to use email or phonenumber
 	useEmail := true
 	if len(phoneNumber) > 0 {
@@ -345,7 +348,7 @@ func Login(db Database, lang string, params map[string]interface{}, pwdCheckCall
 	}
 
 	//save refresh token to db
-	_, err = db.CreateSession(Session{UserID: user.ID, RefreshToken: refreshToken, CreatedAt: null.TimeFrom(TimeNow())}, lang)
+	_, err = db.CreateSession(Session{UserID: user.ID, RefreshToken: refreshToken, CreatedAt: null.TimeFrom(TimeNow()), IPAddr: ipAddr, UserAgent: userAgent}, lang)
 	if err != nil {
 		return nil, err
 	}

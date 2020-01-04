@@ -182,6 +182,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 
 	lang, receivedData := getParams(r)
+	receivedData["ip_addr"] = r.RemoteAddr
+	receivedData["user_agent"] = r.UserAgent()
 
 	response, err := ngauth.Login(db, lang, receivedData, hashCheck)
 	if err != nil {

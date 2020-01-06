@@ -55,15 +55,31 @@ func GenerateOTP(db Database, lang string, params map[string]interface{}, sendOT
 		phoneNumber = num
 	}
 
-	// //check for existing verified user
-	// otp, err := db.GetOTP(email, phoneNumber, otpFor, lang)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	//check for existing verified user -- when registering
+	if Config.VerifyBeforeRegister && otpFor == otpForRegister {
+		//check if user already exists
+		regdUser, err := db.GetUserBy(email, phoneNumber, lang)
+		if err != nil {
+			return nil, err
+		}
 
-	// if otp != nil && otp.VerifiedAt > 0 {
-	// 	return nil, NewError(lang, ErrorAlreadyVerified)
-	// }
+		if regdUser != nil {
+			return nil, NewError(lang, ErrorUsernameExists)
+		}
+	}
+
+	//check for unregistered user -- when resetting password
+	if otpFor == otpForReset {
+
+		regdUser, err := db.GetUserBy(email, phoneNumber, lang)
+		if err != nil {
+			return nil, err
+		}
+
+		if regdUser == nil {
+			return nil, NewError(lang, ErrorUserNotFound)
+		}
+	}
 
 	verifCode := SecureRandomNumericStringStandard()
 

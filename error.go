@@ -41,6 +41,7 @@ const (
 	ErrorInvalidToken     = 2013
 	ErrorGetVerifiedFirst = 2014
 	ErrorWrongValueFor    = 2015
+	ErrorUserNotFound     = 2016
 )
 
 var errorText = map[int]map[string]string{
@@ -65,6 +66,7 @@ var errorText = map[int]map[string]string{
 	ErrorInvalidToken:       map[string]string{LanguageEN: "Invalid token!", LanguageTR: "Geçersiz token!"},
 	ErrorGetVerifiedFirst:   map[string]string{LanguageEN: "Get verified first!", LanguageTR: "önce doğrulanmalısın!"},
 	ErrorWrongValueFor:      map[string]string{LanguageEN: "Wrong value for: ", LanguageTR: "Yanlış değer: "},
+	ErrorUserNotFound:       map[string]string{LanguageEN: "User Not Found", LanguageTR: "Kullanıcı Bulunamadı"},
 }
 
 // ErrorText - returns a text for the API error code. It returns the empty

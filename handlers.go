@@ -1,6 +1,7 @@
 package ngauth
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -81,11 +82,37 @@ func GenerateOTP(db Database, lang string, params map[string]interface{}, sendOT
 		}
 	}
 
+	//ban users from resending too many times in a short time
+	otpList, err := db.GetOTPs(email, phoneNumber, otpFor, 0, int64(Config.OTPMaxRetry), lang)
+	if err != nil {
+		return nil, err
+	}
+
+	if otpList != nil && len(otpList) >= Config.OTPMaxRetry {
+		otp1 := otpList[0]
+		otp2 := otpList[Config.OTPMaxRetry-1]
+
+		if otp1.CreatedAt.Valid && otp2.CreatedAt.Valid {
+			diffBounds := int64(otp1.CreatedAt.Time.Sub(otp2.CreatedAt.Time) / time.Second)
+
+			diffNowToLastOTP := int64(time.Now().Sub(otp1.CreatedAt.Time) / time.Second)
+
+			//check if time less than findtime
+			if diffBounds < Config.OTPFindTime && diffNowToLastOTP < Config.OTPBanTime {
+				waitFor := Config.OTPBanTime - diffNowToLastOTP
+				waitForMsg := fmt.Sprintf("%s: %d seconds", ErrorText(lang, ErrorWaitFor), waitFor)
+				return nil, NewErrorWithMessage(ErrorBadRequest, waitForMsg)
+			}
+
+		}
+
+	}
+
 	verifCode := SecureRandomNumericStringStandard()
 
-	expiresAt := ExpireAtTime(time.Duration(Config.OTPExpireMins) * time.Minute) //in 5mins
+	expiresAt := ExpireAtTime(time.Duration(Config.OTPExpireTime) * time.Second)
 
-	_, err := db.CreateOTP(OTP{Code: verifCode, OTPFor: otpFor, Email: email, PhoneNumber: phoneNumber, ExpiresAt: null.TimeFrom(expiresAt), CreatedAt: null.TimeFrom(TimeNow())}, lang)
+	_, err = db.CreateOTP(OTP{Code: verifCode, OTPFor: otpFor, Email: email, PhoneNumber: phoneNumber, ExpiresAt: null.TimeFrom(expiresAt), CreatedAt: null.TimeFrom(TimeNow())}, lang)
 	if err != nil {
 		return nil, err
 	}
@@ -160,11 +187,6 @@ func VerifyOTP(db Database, lang string, params map[string]interface{}) (map[str
 	//invalid otp
 	if otp != nil && otp.Code != otpCode {
 		return nil, NewError(lang, ErrorInvalidOTPCode)
-	}
-
-	//already verified
-	if otp != nil && otp.VerifiedAt.Valid {
-		return nil, NewError(lang, ErrorAlreadyVerified)
 	}
 
 	//valid otp

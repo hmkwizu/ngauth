@@ -10,8 +10,13 @@ USERS_TABLE_NAME: users
 OTP_TABLE_NAME: otp
 SESSIONS_TABLE_NAME: sessions
 
-# OTP
-OTP_EXPIRE_MINS: 5
+# OTP (time in seconds)
+OTP_EXPIRE_TIME: 300
+
+# Ban users from sending many OTPs within a short time
+OTP_BAN_TIME: 300
+OTP_FIND_TIME: 300
+OTP_MAX_RETRY: 3
 
 # SMTP
 SMTP_USERNAME: user@example.com

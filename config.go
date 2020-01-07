@@ -49,7 +49,10 @@ type Configuration struct {
 	JWTRefreshExpireMins int
 
 	//otp
-	OTPExpireMins int
+	OTPExpireTime int64
+	OTPBanTime    int64
+	OTPFindTime   int64
+	OTPMaxRetry   int
 
 	//only register verified users
 	VerifyBeforeRegister bool
@@ -83,7 +86,10 @@ func ParseConfig(inConfig *Configuration) {
 	viper.SetDefault("OTP_TABLE_NAME", "otp")
 	viper.SetDefault("SESSIONS_TABLE_NAME", "sessions")
 
-	viper.SetDefault("OTP_EXPIRE_MINS", "5")
+	viper.SetDefault("OTP_EXPIRE_TIME", "300") //default 5mins
+	viper.SetDefault("OTP_BAN_TIME", "300")    //default 5mins
+	viper.SetDefault("OTP_FIND_TIME", "300")   //default 5mins
+	viper.SetDefault("OTP_MAX_RETRY", "3")
 
 	//at least 32 byte long for security
 	viper.SetDefault("SIGN_KEY", "g4k591b582367a97acd7d1e5dc260729")
@@ -99,7 +105,11 @@ func ParseConfig(inConfig *Configuration) {
 	inConfig.OTPTableName = viper.GetString("OTP_TABLE_NAME")
 	inConfig.SessionsTableName = viper.GetString("SESSIONS_TABLE_NAME")
 
-	inConfig.OTPExpireMins = viper.GetInt("OTP_EXPIRE_MINS")
+	inConfig.OTPExpireTime = viper.GetInt64("OTP_EXPIRE_TIME")
+	inConfig.OTPBanTime = viper.GetInt64("OTP_BAN_TIME")
+	inConfig.OTPFindTime = viper.GetInt64("OTP_FIND_TIME")
+	inConfig.OTPMaxRetry = viper.GetInt("OTP_MAX_RETRY")
+
 	inConfig.SignKey = []byte(viper.GetString("SIGN_KEY"))
 	inConfig.JWTAccessExpireMins = viper.GetInt("JWT_ACCESS_EXPIRE_MINS")
 	inConfig.JWTRefreshExpireMins = viper.GetInt("JWT_REFRESH_EXPIRE_MINS")

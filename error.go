@@ -42,6 +42,7 @@ const (
 	ErrorGetVerifiedFirst = 2014
 	ErrorWrongValueFor    = 2015
 	ErrorUserNotFound     = 2016
+	ErrorWaitFor          = 2017
 )
 
 var errorText = map[int]map[string]string{
@@ -67,6 +68,7 @@ var errorText = map[int]map[string]string{
 	ErrorGetVerifiedFirst:   map[string]string{LanguageEN: "Get verified first!", LanguageTR: "önce doğrulanmalısın!"},
 	ErrorWrongValueFor:      map[string]string{LanguageEN: "Wrong value for: ", LanguageTR: "Yanlış değer: "},
 	ErrorUserNotFound:       map[string]string{LanguageEN: "User Not Found", LanguageTR: "Kullanıcı Bulunamadı"},
+	ErrorWaitFor:            map[string]string{LanguageEN: "Please wait for", LanguageTR: "Lütfen bekleyin"},
 }
 
 // ErrorText - returns a text for the API error code. It returns the empty

@@ -13,6 +13,7 @@ type Database interface {
 	//###########  OTP
 	// GetOTP - returns the most current otp
 	GetOTP(email string, phoneNo string, otpFor string, lang string) (*OTP, *Error)
+	GetOTPs(email string, phoneNo string, otpFor string, offset int64, limit int64, lang string) ([]OTP, *Error)
 	// CreateOTP - save otp to db
 	CreateOTP(otp OTP, lang string) (interface{}, *Error)
 	UpdateOTPByID(otpID interface{}, columns interface{}, lang string) *Error

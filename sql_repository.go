@@ -193,6 +193,51 @@ func (r *SQLRepository) GetOTP(email string, phoneNo string, otpFor string, lang
 	return &otp, nil
 }
 
+// GetOTPs - get otps by using email/phoneNo
+func (r *SQLRepository) GetOTPs(email string, phoneNo string, otpFor string, offset int64, limit int64, lang string) ([]OTP, *Error) {
+
+	if (IsEmptyString(email) && IsEmptyString(phoneNo)) || IsEmptyString(otpFor) {
+		return nil, NewError(lang, ErrorEmptyFields)
+	}
+
+	//flag to show whether to use email or phonenumber
+	useEmail := true
+	if !IsEmptyString(phoneNo) {
+		useEmail = false
+		email = ""
+	}
+
+	query := r.DB.Table(Config.OTPTableName).Select("*").Where("otp_for=?", otpFor)
+
+	//email
+	if useEmail {
+		query = query.Where("email=?", email)
+	} else {
+		//phone number
+		query = query.Where("phone_number=?", phoneNo)
+
+	}
+
+	//limit and offset
+	if limit > 0 && offset >= 0 {
+		query = query.Limit(limit).Offset(offset)
+	}
+
+	// select
+	results := make([]OTP, 0, 10)
+	err := query.Order("created_at DESC").Find(&results)
+
+	//no rows error
+	if err.RecordNotFound() {
+		return nil, nil
+	}
+	//any other error
+	if err.Error != nil {
+		return nil, NewErrorWithMessage(ErrorDBError, err.Error.Error())
+	}
+	return results, nil
+}
+
 // UpdateOTPByID - updates otp by using ID
 //columns map[string]interface{}
 func (r *SQLRepository) UpdateOTPByID(otpID interface{}, columns interface{}, lang string) *Error {

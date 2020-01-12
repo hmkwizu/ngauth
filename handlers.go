@@ -614,3 +614,32 @@ func Token(db Database, lang string, params map[string]interface{}) (map[string]
 
 	return response, nil
 }
+
+// UpdatePushToken - update push device token
+func UpdatePushToken(db Database, lang string, params map[string]interface{}) (map[string]interface{}, *Error) {
+
+	token := GetStringOrEmpty(params["push_token"])
+	deviceID := GetStringOrEmpty(params["device_id"])
+
+	if IsEmptyString(token) || IsEmptyString(deviceID) {
+		return nil, NewError(lang, ErrorEmptyFields)
+	}
+
+	ipAddr := GetStringOrEmpty(params["ip_addr"])
+	userAgent := GetStringOrEmpty(params["user_agent"])
+
+	createdAt := null.TimeFrom(TimeNow())
+	push := PushToken{DeviceID: deviceID, PushToken: token, IPAddr: ipAddr, UserAgent: userAgent, CreatedAt: createdAt, UpdatedAt: createdAt}
+
+	err := db.CreateOrUpdatePushToken(push, lang)
+	if err != nil {
+		return nil, err
+	}
+
+	//Prepare the response
+	response := make(map[string]interface{})
+	response["code"] = http.StatusOK
+	response["success"] = true
+
+	return response, nil
+}

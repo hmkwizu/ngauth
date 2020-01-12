@@ -74,6 +74,9 @@ func routes() *chi.Mux {
 	//change password, token required
 	router.Post("/change_password", ChangePassword)
 
+	//push token
+	router.Post("/update_push_token", UpdatePushToken)
+
 	//public routes
 	router.Route("/pb", func(r chi.Router) {
 		r.Get("/*", HandleAllPublic)
@@ -246,6 +249,22 @@ func Token(w http.ResponseWriter, r *http.Request) {
 		} else {
 			ngauth.ErrorResponse(w, err.Message, err.Code)
 		}
+		return
+	}
+
+	render.JSON(w, r, response)
+}
+
+// UpdatePushToken - updates push token
+func UpdatePushToken(w http.ResponseWriter, r *http.Request) {
+
+	lang, receivedData := getParams(r)
+	receivedData["ip_addr"] = r.RemoteAddr
+	receivedData["user_agent"] = r.UserAgent()
+
+	response, err := ngauth.UpdatePushToken(db, lang, receivedData)
+	if err != nil {
+		ngauth.ErrorResponse(w, err.Message, err.Code)
 		return
 	}
 

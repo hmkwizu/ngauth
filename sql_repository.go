@@ -275,3 +275,18 @@ func (r *SQLRepository) GetSession(refreshToken string, lang string) (*Session, 
 	}
 	return &session, nil
 }
+
+// CreateOrUpdatePushToken - creates/updates push token
+func (r *SQLRepository) CreateOrUpdatePushToken(pushToken PushToken, lang string) *Error {
+
+	if len(pushToken.DeviceID) == 0 || len(pushToken.PushToken) == 0 {
+		return NewError(lang, ErrorEmptyFields)
+	}
+
+	err := r.DB.Table("push_tokens").Where(PushToken{DeviceID: pushToken.DeviceID}).Assign(PushToken{PushToken: pushToken.PushToken, UpdatedAt: pushToken.UpdatedAt}).FirstOrCreate(&pushToken)
+	if err.Error != nil {
+		return NewErrorWithMessage(ErrorDBError, err.Error.Error())
+	}
+
+	return nil
+}

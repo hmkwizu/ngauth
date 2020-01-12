@@ -21,4 +21,7 @@ type Database interface {
 	//########### Sessions
 	CreateSession(session Session, lang string) (interface{}, *Error)
 	GetSession(refreshToken string, lang string) (*Session, *Error)
+
+	//########### Push Tokens
+	CreateOrUpdatePushToken(pushToken PushToken, lang string) *Error
 }

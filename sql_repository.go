@@ -276,6 +276,8 @@ func (r *SQLRepository) GetSession(refreshToken string, lang string) (*Session, 
 	return &session, nil
 }
 
+//####################### Push Tokens
+
 // CreateOrUpdatePushToken - creates/updates push token
 func (r *SQLRepository) CreateOrUpdatePushToken(pushToken PushToken, lang string) *Error {
 
@@ -283,10 +285,30 @@ func (r *SQLRepository) CreateOrUpdatePushToken(pushToken PushToken, lang string
 		return NewError(lang, ErrorEmptyFields)
 	}
 
-	err := r.DB.Table("push_tokens").Where(PushToken{DeviceID: pushToken.DeviceID}).Assign(PushToken{PushToken: pushToken.PushToken, UpdatedAt: pushToken.UpdatedAt}).FirstOrCreate(&pushToken)
+	err := r.DB.Table("push_tokens").Where(PushToken{DeviceID: pushToken.DeviceID}).Assign(PushToken{PushToken: pushToken.PushToken, DeviceOS: pushToken.DeviceOS, UpdatedAt: pushToken.UpdatedAt}).FirstOrCreate(&pushToken)
 	if err.Error != nil {
 		return NewErrorWithMessage(ErrorDBError, err.Error.Error())
 	}
 
 	return nil
+}
+
+// GetPushToken - get push token by deviceID
+func (r *SQLRepository) GetPushToken(deviceID string, lang string) (*PushToken, *Error) {
+
+	if len(deviceID) == 0 {
+		return nil, NewError(lang, ErrorEmptyFields)
+	}
+
+	var token PushToken
+	err := r.DB.Table("push_tokens").Select("*").Where(PushToken{DeviceID: deviceID}).First(&token)
+	//no rows error
+	if err.RecordNotFound() {
+		return nil, nil
+	}
+	//any other error
+	if err.Error != nil {
+		return nil, NewErrorWithMessage(ErrorDBError, err.Error.Error())
+	}
+	return &token, nil
 }

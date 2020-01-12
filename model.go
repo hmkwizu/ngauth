@@ -47,6 +47,7 @@ type Session struct {
 type PushToken struct {
 	ID        interface{} `json:"id" bson:"_id,omitempty"`
 	DeviceID  string      `json:"device_id"`
+	DeviceOS  string      `json:"device_os"`
 	PushToken string      `json:"push_token"`
 	CreatedAt null.Time   `json:"created_at"`
 	UpdatedAt null.Time   `json:"updated_at"`

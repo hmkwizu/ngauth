@@ -24,4 +24,5 @@ type Database interface {
 
 	//########### Push Tokens
 	CreateOrUpdatePushToken(pushToken PushToken, lang string) *Error
+	GetPushToken(deviceID string, lang string) (*PushToken, *Error)
 }

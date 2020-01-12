@@ -620,8 +620,9 @@ func UpdatePushToken(db Database, lang string, params map[string]interface{}) (m
 
 	token := GetStringOrEmpty(params["push_token"])
 	deviceID := GetStringOrEmpty(params["device_id"])
+	deviceOS := GetStringOrEmpty(params["device_os"])
 
-	if IsEmptyString(token) || IsEmptyString(deviceID) {
+	if IsEmptyString(token) || IsEmptyString(deviceID) || IsEmptyString(deviceOS) {
 		return nil, NewError(lang, ErrorEmptyFields)
 	}
 
@@ -629,7 +630,7 @@ func UpdatePushToken(db Database, lang string, params map[string]interface{}) (m
 	userAgent := GetStringOrEmpty(params["user_agent"])
 
 	createdAt := null.TimeFrom(TimeNow())
-	push := PushToken{DeviceID: deviceID, PushToken: token, IPAddr: ipAddr, UserAgent: userAgent, CreatedAt: createdAt, UpdatedAt: createdAt}
+	push := PushToken{DeviceID: deviceID, DeviceOS: deviceOS, PushToken: token, IPAddr: ipAddr, UserAgent: userAgent, CreatedAt: createdAt, UpdatedAt: createdAt}
 
 	err := db.CreateOrUpdatePushToken(push, lang)
 	if err != nil {

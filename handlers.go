@@ -397,6 +397,8 @@ func Login(db Database, lang string, params map[string]interface{}, pwdCheckCall
 	response["code"] = http.StatusOK
 	response["success"] = true
 	response["id"] = user.ID
+	response["name"] = user.Name
+	response["photo_url"] = user.PhotoURL
 	response["access_token"] = accessToken
 	response["refresh_token"] = refreshToken
 

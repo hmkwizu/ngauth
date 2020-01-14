@@ -122,7 +122,7 @@ func (r *SQLRepository) GetUserBy(email string, phoneNo string, lang string) (*U
 		email = ""
 	}
 
-	query := r.DB.Table(Config.UsersTableName).Select("id,email,phone_number,password")
+	query := r.DB.Table(Config.UsersTableName).Select("*")
 
 	if useEmail {
 		query = query.Where("email=?", email)

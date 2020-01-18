@@ -2,7 +2,6 @@ package ngauth
 
 import (
 	"crypto/rand"
-	"database/sql"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -45,14 +44,6 @@ func NowTimestamp() int64 {
 // TimeNow returns time now
 func TimeNow() time.Time {
 	return time.Now()
-}
-
-// NullTimeFrom creates a new Time that will always be valid.
-func NullTimeFrom(t time.Time) sql.NullTime {
-	return sql.NullTime{
-		Time:  t,
-		Valid: true,
-	}
 }
 
 // LogInfo - logs a message to stdout

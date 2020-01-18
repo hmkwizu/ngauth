@@ -50,6 +50,7 @@ type PushToken struct {
 	DeviceID  string      `json:"device_id"`
 	DeviceOS  string      `json:"device_os"`
 	PushToken string      `json:"push_token"`
+	UserID    interface{} `json:"user_id"`
 	CreatedAt null.Time   `json:"created_at"`
 	UpdatedAt null.Time   `json:"updated_at"`
 

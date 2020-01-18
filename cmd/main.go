@@ -216,7 +216,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 
 	// Validate access token
 	accessToken := ngauth.GetTokenFromHeader(r)
-	err := ngauth.IsValidToken(accessToken)
+	_, err := ngauth.IsValidToken(accessToken)
 	if err != nil {
 		if err.Code == ngauth.ErrorInvalidToken {
 			ngauth.HTTPErrorResponse(w, err.Message, http.StatusUnauthorized)
@@ -334,7 +334,7 @@ func HandleAllPrivate(w http.ResponseWriter, r *http.Request) {
 
 	// Validate access token
 	accessToken := ngauth.GetTokenFromHeader(r)
-	err := ngauth.IsValidToken(accessToken)
+	_, err := ngauth.IsValidToken(accessToken)
 	if err != nil {
 		if err.Code == ngauth.ErrorInvalidToken {
 			ngauth.HTTPErrorResponse(w, err.Message, http.StatusUnauthorized)

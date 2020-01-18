@@ -312,3 +312,51 @@ func (r *SQLRepository) GetPushToken(deviceID string, lang string) (*PushToken, 
 	}
 	return &token, nil
 }
+
+// GetPushTokensForUserID - get push tokens for specific user - (multiple login with same account on different devices)
+func (r *SQLRepository) GetPushTokensForUserID(userID interface{}, lang string) ([]PushToken, *Error) {
+
+	if userID == nil {
+		return nil, NewError(lang, ErrorEmptyFields)
+	}
+
+	query := r.DB.Table("push_tokens").Select("*").Where(PushToken{UserID: userID})
+
+	// select
+	results := make([]PushToken, 0, 10)
+	err := query.Order("updated_at DESC").Find(&results)
+
+	//no rows error
+	if err.RecordNotFound() {
+		return nil, nil
+	}
+	//any other error
+	if err.Error != nil {
+		return nil, NewErrorWithMessage(ErrorDBError, err.Error.Error())
+	}
+	return results, nil
+}
+
+// GetPushTokens - get push tokens for user id list
+func (r *SQLRepository) GetPushTokens(userIDs []interface{}, lang string) ([]PushToken, *Error) {
+
+	if userIDs == nil || len(userIDs) == 0 {
+		return nil, NewError(lang, ErrorEmptyFields)
+	}
+
+	query := r.DB.Table("push_tokens").Select("*").Where("user_id IN (?)", userIDs)
+
+	// select
+	results := make([]PushToken, 0, 10)
+	err := query.Order("updated_at DESC").Find(&results)
+
+	//no rows error
+	if err.RecordNotFound() {
+		return nil, nil
+	}
+	//any other error
+	if err.Error != nil {
+		return nil, NewErrorWithMessage(ErrorDBError, err.Error.Error())
+	}
+	return results, nil
+}

@@ -235,10 +235,12 @@ func BcryptHashCheck(hashedPwd string, plainPwd string) bool {
 //############## JWT
 
 // IsValidToken - check if jwt token is valid
-func IsValidToken(tokenStr string) *Error {
+// if no error then token is valid
+// return: claims map, error
+func IsValidToken(tokenStr string) (map[string]interface{}, *Error) {
 
 	if tokenStr == "" {
-		return NewErrorWithMessage(ErrorBadRequest, "No token found")
+		return nil, NewErrorWithMessage(ErrorBadRequest, "No token found")
 	}
 
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
@@ -253,22 +255,27 @@ func IsValidToken(tokenStr string) *Error {
 	if err != nil {
 		if verr, ok := err.(*jwt.ValidationError); ok {
 			if verr.Errors&jwt.ValidationErrorExpired > 0 {
-				return NewErrorWithMessage(ErrorInvalidToken, "Token expired")
+				return nil, NewErrorWithMessage(ErrorInvalidToken, "Token expired")
 			} else if verr.Errors&jwt.ValidationErrorIssuedAt > 0 {
-				return NewErrorWithMessage(ErrorBadRequest, "Token iat invalid")
+				return nil, NewErrorWithMessage(ErrorBadRequest, "Token iat invalid")
 			} else if verr.Errors&jwt.ValidationErrorNotValidYet > 0 {
-				return NewErrorWithMessage(ErrorBadRequest, "Token nbf invalid")
+				return nil, NewErrorWithMessage(ErrorBadRequest, "Token nbf invalid")
 			}
 		}
-		return NewErrorWithMessage(ErrorBadRequest, err.Error())
+		return nil, NewErrorWithMessage(ErrorBadRequest, err.Error())
 	}
 
 	if token == nil || !token.Valid {
-		return NewErrorWithMessage(ErrorInvalidToken, err.Error())
+		return nil, NewErrorWithMessage(ErrorInvalidToken, err.Error())
 	}
 
 	//valid
-	return nil
+	var claims jwt.MapClaims
+	if tokenClaims, ok := token.Claims.(jwt.MapClaims); ok {
+		claims = tokenClaims
+	}
+
+	return claims, nil
 }
 
 // GenerateAccessToken - generates access token

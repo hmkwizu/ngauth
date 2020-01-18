@@ -576,17 +576,16 @@ func ResetPassword(db Database, lang string, params map[string]interface{}, pwdH
 // Token - refresh access_token using your refresh_token
 func Token(db Database, lang string, params map[string]interface{}) (map[string]interface{}, *Error) {
 
-	userID := GetStringOrEmpty(params["user_id"])
 	refreshToken := GetStringOrEmpty(params["refresh_token"])
 
 	// Validate refresh token
-	err := IsValidToken(refreshToken)
+	_, err := IsValidToken(refreshToken)
 	if err != nil {
 		return nil, err
 	}
 
 	//check for empty fields
-	if IsEmptyTextContent(refreshToken) || IsEmptyTextContent(userID) {
+	if IsEmptyTextContent(refreshToken) {
 		return nil, NewError(lang, ErrorEmptyFields)
 	}
 
@@ -601,7 +600,7 @@ func Token(db Database, lang string, params map[string]interface{}) (map[string]
 	}
 
 	//access token
-	accessToken, err := GenerateAccessToken(userID)
+	accessToken, err := GenerateAccessToken(session.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -610,9 +609,7 @@ func Token(db Database, lang string, params map[string]interface{}) (map[string]
 	response := make(map[string]interface{})
 	response["code"] = http.StatusOK
 	response["success"] = true
-	response["id"] = userID
 	response["access_token"] = accessToken
-	response["refresh_token"] = refreshToken
 
 	return response, nil
 }

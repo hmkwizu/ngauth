@@ -266,13 +266,13 @@ func UpdatePushToken(w http.ResponseWriter, r *http.Request) {
 	receivedData["ip_addr"] = r.RemoteAddr
 	receivedData["user_agent"] = r.UserAgent()
 
-	//set current user_id if access_token present
+	//set current loggedin_user_id if access_token present
 	if errAccessToken != nil {
 
-		//IMPORTANT - unset any user_id set by the client
-		receivedData["user_id"] = nil
+		//IMPORTANT - unset any loggedin_user_id set by the client
+		receivedData["loggedin_user_id"] = nil
 	} else {
-		receivedData["user_id"] = claims["id"]
+		receivedData["loggedin_user_id"] = claims["id"]
 	}
 
 	response, err := ngauth.UpdatePushToken(db, lang, receivedData)

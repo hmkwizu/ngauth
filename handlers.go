@@ -620,7 +620,7 @@ func UpdatePushToken(db Database, lang string, params map[string]interface{}) (m
 	token := GetStringOrEmpty(params["push_token"])
 	deviceID := GetStringOrEmpty(params["device_id"])
 	deviceOS := GetStringOrEmpty(params["device_os"])
-	userID := params["user_id"]
+	userID := params["loggedin_user_id"]
 
 	if IsEmptyString(token) || IsEmptyString(deviceID) || IsEmptyString(deviceOS) {
 		return nil, NewError(lang, ErrorEmptyFields)

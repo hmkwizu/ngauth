@@ -620,6 +620,7 @@ func UpdatePushToken(db Database, lang string, params map[string]interface{}) (m
 	token := GetStringOrEmpty(params["push_token"])
 	deviceID := GetStringOrEmpty(params["device_id"])
 	deviceOS := GetStringOrEmpty(params["device_os"])
+	userID := params["user_id"]
 
 	if IsEmptyString(token) || IsEmptyString(deviceID) || IsEmptyString(deviceOS) {
 		return nil, NewError(lang, ErrorEmptyFields)
@@ -630,6 +631,11 @@ func UpdatePushToken(db Database, lang string, params map[string]interface{}) (m
 
 	createdAt := null.TimeFrom(TimeNow())
 	push := PushToken{DeviceID: deviceID, DeviceOS: deviceOS, PushToken: token, IPAddr: ipAddr, UserAgent: userAgent, CreatedAt: createdAt, UpdatedAt: createdAt}
+
+	//update user_id, if another account was used from same device
+	if userID != nil {
+		push.UserID = userID
+	}
 
 	err := db.CreateOrUpdatePushToken(push, lang)
 	if err != nil {

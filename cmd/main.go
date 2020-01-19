@@ -258,9 +258,22 @@ func Token(w http.ResponseWriter, r *http.Request) {
 // UpdatePushToken - updates push token
 func UpdatePushToken(w http.ResponseWriter, r *http.Request) {
 
+	// Get access token if available
+	accessToken := ngauth.GetTokenFromHeader(r)
+	claims, errAccessToken := ngauth.IsValidToken(accessToken)
+
 	lang, receivedData := getParams(r)
 	receivedData["ip_addr"] = r.RemoteAddr
 	receivedData["user_agent"] = r.UserAgent()
+
+	//set current user_id if access_token present
+	if errAccessToken != nil {
+
+		//IMPORTANT - unset any user_id set by the client
+		receivedData["user_id"] = nil
+	} else {
+		receivedData["user_id"] = claims["id"]
+	}
 
 	response, err := ngauth.UpdatePushToken(db, lang, receivedData)
 	if err != nil {

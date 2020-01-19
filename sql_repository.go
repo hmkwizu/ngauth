@@ -285,7 +285,12 @@ func (r *SQLRepository) CreateOrUpdatePushToken(pushToken PushToken, lang string
 		return NewError(lang, ErrorEmptyFields)
 	}
 
-	err := r.DB.Table("push_tokens").Where(PushToken{DeviceID: pushToken.DeviceID}).Assign(PushToken{PushToken: pushToken.PushToken, DeviceOS: pushToken.DeviceOS, UpdatedAt: pushToken.UpdatedAt}).FirstOrCreate(&pushToken)
+	updateParams := PushToken{PushToken: pushToken.PushToken, DeviceOS: pushToken.DeviceOS, UpdatedAt: pushToken.UpdatedAt}
+	if pushToken.UserID != nil {
+		updateParams.UserID = pushToken.UserID
+	}
+
+	err := r.DB.Table("push_tokens").Where(PushToken{DeviceID: pushToken.DeviceID}).Assign(updateParams).FirstOrCreate(&pushToken)
 	if err.Error != nil {
 		return NewErrorWithMessage(ErrorDBError, err.Error.Error())
 	}

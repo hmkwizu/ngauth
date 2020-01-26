@@ -3,6 +3,7 @@ package ngauth
 // Database - Database interface, all db need to implement this
 type Database interface {
 	Init(config *Configuration) error
+	Close() error
 	//GetID(id interface{}) interface{}
 
 	//GetUser(userID interface{}, lang string) (*User, *Error)

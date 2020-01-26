@@ -44,6 +44,11 @@ func (r *SQLRepository) Init(config *Configuration) error {
 	return nil
 }
 
+// Close - closes the db
+func (r *SQLRepository) Close() error {
+	return r.DB.Close()
+}
+
 //############################# Utils #########################
 
 // UpdateRecordByID - update a record by id. the id in the table has to be "id"

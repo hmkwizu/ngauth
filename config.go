@@ -68,6 +68,8 @@ var Config *Configuration
 // ParseConfig parses environment variables to configuration
 func ParseConfig(inConfig *Configuration) {
 
+	viper.AutomaticEnv()
+
 	//read config file
 	viper.SetConfigName(".config") // name of config file (without extension)
 	viper.AddConfigPath(".")       // look for config in the working directory
@@ -76,7 +78,6 @@ func ParseConfig(inConfig *Configuration) {
 		log.Printf("Fatal error reading config file: %s \n", err)
 	}
 
-	viper.AutomaticEnv()
 	viper.SetDefault("PORT", "8080")
 
 	viper.SetDefault("DB_CONNECTION_STRING", "test:test@tcp(127.0.0.1:3306)/mydb?charset=utf8&parseTime=True&loc=Local")

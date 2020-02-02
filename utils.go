@@ -47,17 +47,29 @@ func TimeNow() time.Time {
 }
 
 // LogInfo - logs a message to stdout
-func LogInfo(msg string) {
+func LogInfo(v ...interface{}) {
 	// fmt.Fprintln(os.Stdout, msg)
 	log.SetOutput(os.Stdout)
-	log.Println(msg)
+	log.Println(v...)
+}
+
+// LogInfof - logs a message to stdout
+func LogInfof(format string, v ...interface{}) {
+	log.SetOutput(os.Stdout)
+	log.Printf(format, v...)
 }
 
 // LogError - logs a message to stderr
-func LogError(msg string) {
+func LogError(v ...interface{}) {
 	// fmt.Fprintln(os.Stderr, msg)
 	log.SetOutput(os.Stderr)
-	log.Println(msg)
+	log.Println(v...)
+}
+
+// LogErrorf - logs a message to stderr
+func LogErrorf(format string, v ...interface{}) {
+	log.SetOutput(os.Stdout)
+	log.Printf(format, v...)
 }
 
 // table - lookup table for the secure number generator

@@ -1,7 +1,6 @@
 package ngauth
 
 import (
-	"log"
 
 	// mysql dialect for gorm (wrapper for go-sql-driver)
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -68,6 +67,8 @@ var Config *Configuration
 // ParseConfig parses environment variables to configuration
 func ParseConfig(inConfig *Configuration) {
 
+	LogInfo("Config: parsing config started")
+
 	viper.AutomaticEnv()
 
 	//read config file
@@ -75,7 +76,7 @@ func ParseConfig(inConfig *Configuration) {
 	viper.AddConfigPath(".")       // look for config in the working directory
 	err := viper.ReadInConfig()    // Find and read the config file
 	if err != nil {                // Handle errors reading the config file
-		log.Printf("Fatal error reading config file: %s \n", err)
+		LogInfof("Config: error reading config file: %s \n", err)
 	}
 
 	viper.SetDefault("PORT", "8080")
@@ -119,6 +120,8 @@ func ParseConfig(inConfig *Configuration) {
 	//proxy
 	inConfig.UpstreamPublicURL = viper.GetString("UPSTREAM_PUBLIC_URL")
 	inConfig.UpstreamPrivateURL = viper.GetString("UPSTREAM_PRIVATE_URL")
+
+	LogInfo("Config: parsing config completed")
 
 }
 

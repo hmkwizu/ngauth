@@ -2,7 +2,6 @@ package ngauth
 
 import (
 	"errors"
-	"log"
 
 	"github.com/jinzhu/gorm"
 )
@@ -16,14 +15,16 @@ type SQLRepository struct {
 // Init - initialize
 func (r *SQLRepository) Init(config *Configuration) error {
 
+	LogInfo("DB: Initialization started")
+
 	//make sure InitConfig was called
 	if len(config.DBDriver) == 0 {
-		log.Printf("DB Driver is empty")
+		LogError("DB: Driver is empty")
 		return errors.New("DB Driver is empty")
 	}
 
 	if len(config.DBConnectionString) == 0 {
-		log.Printf("DB ConnectionString is empty")
+		LogError("DB: ConnectionString is empty")
 		return errors.New("DB ConnectionString is empty")
 	}
 
@@ -31,15 +32,15 @@ func (r *SQLRepository) Init(config *Configuration) error {
 	r.DB, err = gorm.Open(config.DBDriver, config.DBConnectionString)
 
 	if err != nil {
-		log.Printf("DB failed: %s \n", err.Error())
+		LogErrorf("DB: failed: %s \n", err.Error())
 		return err
 	}
 
 	if err = r.DB.DB().Ping(); err != nil {
-		log.Printf("DB ping failed: %s \n", err.Error())
+		LogErrorf("DB: ping failed: %s \n", err.Error())
 		return err
 	}
-	log.Printf("DB Connection Successfull!")
+	LogInfo("DB: Connection Successful!")
 
 	return nil
 }

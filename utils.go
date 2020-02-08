@@ -243,7 +243,7 @@ func BcryptHashCheck(hashedPwd string, plainPwd string) bool {
 func IsValidToken(tokenStr string) (map[string]interface{}, *Error) {
 
 	if tokenStr == "" {
-		return nil, NewErrorWithMessage(ErrorBadRequest, "No token found")
+		return nil, NewErrorWithMessage(ErrorInvalidToken, "No token found")
 	}
 
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {

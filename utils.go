@@ -21,6 +21,7 @@ import (
 	"github.com/nyaruka/phonenumbers"
 	"github.com/spf13/cast"
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/guregu/null.v3"
 )
 
 //regex for email validation
@@ -111,6 +112,60 @@ func GetInt64OrZero(val interface{}) int64 {
 	}
 
 	return cast.ToInt64(val)
+}
+
+// GetFloat64OrZero - get float64 or zero
+// to be used in post body submissions, be sure val is a float64
+func GetFloat64OrZero(val interface{}) float64 {
+	if val == nil {
+		return 0
+	}
+
+	return cast.ToFloat64(val)
+}
+
+// GetNullableFloat - get a nullable float
+func GetNullableFloat(val interface{}) null.Float {
+	if val == nil {
+		return null.NewFloat(0, false)
+	}
+
+	newVal := cast.ToFloat64(val)
+
+	return null.FloatFrom(newVal)
+}
+
+// GetNullableInt - get a nullable int
+func GetNullableInt(val interface{}) null.Int {
+	if val == nil {
+		return null.NewInt(0, false)
+	}
+
+	newVal := cast.ToInt64(val)
+
+	return null.IntFrom(newVal)
+}
+
+// GetNullableBool - get a nullable bool
+func GetNullableBool(val interface{}) null.Bool {
+	if val == nil {
+		return null.NewBool(false, false)
+	}
+
+	newVal := cast.ToBool(val)
+
+	return null.BoolFrom(newVal)
+}
+
+// GetNullableString - get a nullable string
+func GetNullableString(val interface{}) null.String {
+	if val == nil {
+		return null.NewString("", false)
+	}
+
+	newVal := cast.ToString(val)
+
+	return null.StringFrom(newVal)
 }
 
 // ArrayContains - checks if an array contains a string

@@ -8,7 +8,6 @@ import (
 type User struct {
 	ID          interface{} `json:"id" bson:"_id,omitempty"`
 	Name        string      `json:"name"`
-	Username    string      `json:"username"`
 	Password    string      `json:"-"`
 	Email       string      `json:"email"`
 	PhoneNumber string      `json:"phone_number"`

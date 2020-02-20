@@ -224,7 +224,6 @@ func Register(db Database, lang string, params map[string]interface{}, pwdHashCa
 	}
 
 	name := GetStringOrEmpty(params["name"])
-	username := GetStringOrEmpty(params["username"])
 	email := GetStringOrEmpty(params["email"])
 	phoneNumber := GetStringOrEmpty(params["phone_number"])
 	countryCode := GetStringOrEmpty(params["country_code"])
@@ -297,7 +296,7 @@ func Register(db Database, lang string, params map[string]interface{}, pwdHashCa
 
 	//now lets register the user
 	hashedPassword := pwdHashCallback(password)
-	user := User{Name: name, Username: username, Email: email, PhoneNumber: phoneNumber, Password: hashedPassword, CreatedAt: null.TimeFrom(TimeNow())}
+	user := User{Name: name, Email: email, PhoneNumber: phoneNumber, Password: hashedPassword, CreatedAt: null.TimeFrom(TimeNow())}
 	result, err := db.CreateUser(user, lang)
 	if err != nil {
 		return nil, err

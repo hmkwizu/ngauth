@@ -370,7 +370,10 @@ func Login(db Database, lang string, params map[string]interface{}, pwdCheckCall
 
 	//passwords do not match
 	if !pwdCheckCallback(user.Password, password) {
-		return nil, NewError(lang, ErrorIncorrectUsernameOrPassword)
+		if useEmail {
+			return nil, NewError(lang, ErrorIncorrectEmailOrPassword)
+		}
+		return nil, NewError(lang, ErrorIncorrectPhoneNumberOrPassword)
 	}
 
 	//access token
@@ -466,7 +469,10 @@ func ChangePassword(db Database, lang string, params map[string]interface{}, pwd
 
 	//user's password incorrect
 	if !pwdCheckCallback(user.Password, password) {
-		return nil, NewError(lang, ErrorIncorrectUsernameOrPassword)
+		if useEmail {
+			return nil, NewError(lang, ErrorIncorrectEmailOrPassword)
+		}
+		return nil, NewError(lang, ErrorIncorrectPhoneNumberOrPassword)
 	}
 
 	//now let's change password

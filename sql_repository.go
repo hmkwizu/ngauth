@@ -97,7 +97,7 @@ func (r *SQLRepository) GetRecord(tableName string, tableColumns string, inRecor
 	err := r.DB.Table(tableName).Select(tableColumns).Where("id=?", recordID).Where("deleted_at IS NULL").First(resultRecord)
 	//no rows error
 	if err.RecordNotFound() {
-		return nil
+		return NewErrorWithMessage(ErrorNotFound, err.Error.Error())
 	}
 	//any other error
 	if err.Error != nil {

@@ -338,23 +338,35 @@ func IsValidToken(tokenStr string) (map[string]interface{}, *Error) {
 
 // GenerateAccessToken - generates access token
 func GenerateAccessToken(userID interface{}) (string, *Error) {
-	return GenerateToken(userID, Config.JWTAccessExpireMins)
+	return GenerateToken(userID, Config.JWTAccessExpireMins, nil)
 }
 
 // GenerateRefreshToken - generates refresh token
 func GenerateRefreshToken(userID interface{}) (string, *Error) {
-	return GenerateToken(userID, Config.JWTRefreshExpireMins)
+	return GenerateToken(userID, Config.JWTRefreshExpireMins, nil)
 }
 
 // GenerateToken - generates signed token
-func GenerateToken(userID interface{}, expireMins int) (string, *Error) {
+func GenerateToken(userID interface{}, expireMins int, params map[string]interface{}) (string, *Error) {
 	//Generate JWT Token
 	// NOTE: Don't add sensitive info to the token, eg. password
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+
+	claims := jwt.MapClaims{
 		"id":  userID,
 		"iat": NowTimestamp(),                                       //issued at NOW!
 		"exp": ExpireAtUTC(time.Duration(expireMins) * time.Minute), //expires in n minutes
-	})
+	}
+
+	//add extra params
+	if params != nil {
+		for k, val := range params {
+			if val != nil {
+				claims[k] = val
+			}
+		}
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	//Sign the Token
 	tokenString, err := token.SignedString(Config.SignKey)

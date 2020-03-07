@@ -22,6 +22,7 @@ const (
 	ErrorBadRequest          = 1002
 	ErrorDBError             = 1003
 	ErrorBackendServerError  = 1004
+	ErrorNotAuthorized       = 1005
 
 	//API errors
 	ErrorNotFound                       = 2001
@@ -50,8 +51,10 @@ const (
 
 var errorText = map[int]map[string]string{
 	ErrorDBError:             map[string]string{LanguageEN: "Database error", LanguageSW: "Database error", LanguageTR: "Veri tabanı hatası"},
+	ErrorBadRequest:          map[string]string{LanguageEN: "Bad Request", LanguageSW: "Bad Request", LanguageTR: "Bad Request"},
 	ErrorInternalServerError: map[string]string{LanguageEN: "Internal Server Error", LanguageSW: "Internal Server Error", LanguageTR: "İç Sunucu Hatası"},
 	ErrorBackendServerError:  map[string]string{LanguageEN: "Backend Server Error", LanguageSW: "Backend Server Error", LanguageTR: "Dış Sunucu Hatası"},
+	ErrorNotAuthorized:       map[string]string{LanguageEN: "Not Authorized", LanguageSW: "Hauna ruhusa", LanguageTR: "Not Authorized"},
 
 	ErrorEmptyFields:         map[string]string{LanguageEN: "Empty Field(s)", LanguageSW: "Empty Field(s)", LanguageTR: "Boş alanları doldur"},
 	ErrorPasswordsDoNotMatch: map[string]string{LanguageEN: "Passwords do not match", LanguageSW: "Passwords do not match", LanguageTR: "Parolalar uyuşmuyor"},

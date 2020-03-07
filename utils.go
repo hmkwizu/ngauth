@@ -124,6 +124,16 @@ func GetFloat64OrZero(val interface{}) float64 {
 	return cast.ToFloat64(val)
 }
 
+// GetBoolOrFalse - get bool or false
+// to be used in post body submissions, be sure val is a float64
+func GetBoolOrFalse(val interface{}) bool {
+	if val == nil {
+		return false
+	}
+
+	return cast.ToBool(val)
+}
+
 // GetNullableFloat - get a nullable float
 func GetNullableFloat(val interface{}) null.Float {
 	if val == nil {
@@ -166,6 +176,17 @@ func GetNullableString(val interface{}) null.String {
 	newVal := cast.ToString(val)
 
 	return null.StringFrom(newVal)
+}
+
+// GetNullableTime - get a nullable time
+func GetNullableTime(val interface{}) null.Time {
+	if val == nil {
+		return null.NewTime(time.Time{}, false)
+	}
+
+	newVal := cast.ToTime(val)
+
+	return null.TimeFrom(newVal)
 }
 
 // ArrayContains - checks if an array contains a string

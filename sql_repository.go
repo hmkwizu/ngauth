@@ -318,7 +318,7 @@ func (r *SQLRepository) GetPushToken(deviceID string, lang string) (*PushToken, 
 	}
 
 	var token PushToken
-	err := r.DB.Table("push_tokens").Select("*").Where(PushToken{DeviceID: deviceID}).First(&token)
+	err := r.DB.Table("push_tokens").Select("*").Where(PushToken{DeviceID: deviceID}).Where("deleted_at IS NULL").First(&token)
 	//no rows error
 	if err.RecordNotFound() {
 		return nil, nil
@@ -337,7 +337,7 @@ func (r *SQLRepository) GetPushTokensForUserID(userID interface{}, lang string) 
 		return nil, NewError(lang, ErrorEmptyFields)
 	}
 
-	query := r.DB.Table("push_tokens").Select("*").Where(PushToken{UserID: userID})
+	query := r.DB.Table("push_tokens").Select("*").Where(PushToken{UserID: userID}).Where("deleted_at IS NULL")
 
 	// select
 	results := make([]PushToken, 0, 10)
@@ -361,7 +361,27 @@ func (r *SQLRepository) GetPushTokens(userIDs []interface{}, lang string) ([]Pus
 		return nil, NewError(lang, ErrorEmptyFields)
 	}
 
-	query := r.DB.Table("push_tokens").Select("*").Where("user_id IN (?)", userIDs)
+	query := r.DB.Table("push_tokens").Select("*").Where("user_id IN (?)", userIDs).Where("deleted_at IS NULL")
+
+	// select
+	results := make([]PushToken, 0, 10)
+	err := query.Order("updated_at DESC").Find(&results)
+
+	//no rows error
+	if err.RecordNotFound() {
+		return nil, nil
+	}
+	//any other error
+	if err.Error != nil {
+		return nil, NewErrorWithMessage(ErrorDBError, err.Error.Error())
+	}
+	return results, nil
+}
+
+// GetAllPushTokens - get all push tokens
+func (r *SQLRepository) GetAllPushTokens(lang string) ([]PushToken, *Error) {
+
+	query := r.DB.Table("push_tokens").Select("*").Where("deleted_at IS NULL")
 
 	// select
 	results := make([]PushToken, 0, 10)

@@ -40,6 +40,18 @@ func (r *SQLRepository) Init(config *Configuration) error {
 		LogErrorf("DB: ping failed: %s \n", err.Error())
 		return err
 	}
+
+	//---- DB Pool settings
+	if config.DBPoolMaxIdleConns >= 0 {
+		r.DB.DB().SetMaxIdleConns(config.DBPoolMaxIdleConns)
+		LogInfof("DB: DBPoolMaxIdleConns: %d", config.DBPoolMaxIdleConns)
+	}
+
+	if config.DBPoolMaxOpenConns > 0 {
+		r.DB.DB().SetMaxOpenConns(config.DBPoolMaxOpenConns)
+		LogInfof("DB: DBPoolMaxOpenConns: %d", config.DBPoolMaxOpenConns)
+	}
+
 	LogInfo("DB: Connection Successful!")
 
 	return nil

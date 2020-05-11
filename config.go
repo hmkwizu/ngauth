@@ -29,7 +29,9 @@ type Configuration struct {
 	DBConnectionString string
 
 	//DBDriver for database/sql,eg values mysql,postgres,mssql,sqlite3
-	DBDriver string
+	DBDriver           string
+	DBPoolMaxIdleConns int
+	DBPoolMaxOpenConns int
 
 	UsersTableName    string
 	OTPTableName      string
@@ -83,6 +85,8 @@ func ParseConfig(inConfig *Configuration) {
 
 	viper.SetDefault("DB_CONNECTION_STRING", "test:test@tcp(127.0.0.1:3306)/mydb?charset=utf8&parseTime=True&loc=Local")
 	viper.SetDefault("DB_DRIVER", "mysql")
+	viper.SetDefault("DB_POOL_MAX_IDLE_CONNS", "-1")
+	viper.SetDefault("DB_POOL_MAX_OPEN_CONNS", "-1")
 
 	viper.SetDefault("USERS_TABLE_NAME", "users")
 	viper.SetDefault("OTP_TABLE_NAME", "otp")
@@ -103,6 +107,9 @@ func ParseConfig(inConfig *Configuration) {
 	inConfig.Port = viper.GetString("PORT")
 	inConfig.DBConnectionString = viper.GetString("DB_CONNECTION_STRING")
 	inConfig.DBDriver = viper.GetString("DB_DRIVER")
+	inConfig.DBPoolMaxIdleConns = viper.GetInt("DB_POOL_MAX_IDLE_CONNS")
+	inConfig.DBPoolMaxOpenConns = viper.GetInt("DB_POOL_MAX_OPEN_CONNS")
+
 	inConfig.UsersTableName = viper.GetString("USERS_TABLE_NAME")
 	inConfig.OTPTableName = viper.GetString("OTP_TABLE_NAME")
 	inConfig.SessionsTableName = viper.GetString("SESSIONS_TABLE_NAME")
